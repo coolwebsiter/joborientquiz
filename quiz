@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Career Quiz — Mostly A/B/C/D/E</title>
+  <style>
+    :root{--bg:#f7fafc;--card:#ffffff;--accent:#2563eb;--muted:#6b7280}
+    body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);margin:0;padding:24px;color:#0f172a}
+    .container{max-width:760px;margin:0 auto}
+    .card{background:var(--card);border-radius:12px;padding:22px 28px;box-shadow:0 6px 18px rgba(15,23,42,0.06)}
+    h1{margin:0 0 6px;font-size:20px}
+    p.lead{margin:0 0 18px;color:var(--muted)}
+    .q{margin-bottom:18px}
+    .q h3{margin:0 0 8px;font-size:15px}
+    label.option{display:block;padding:8px 10px;border-radius:8px;margin-bottom:6px;border:1px solid #eef2ff;cursor:pointer}
+    input[type=radio]{margin-right:10px}
+    .actions{display:flex;gap:10px;margin-top:12px}
+    button{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer}
+    button.secondary{background:#e6e9ee;color:#111}
+    #result{margin-top:18px;padding:14px;border-radius:10px;background:#f1f5f9}
+    .small{font-size:13px;color:var(--muted)}
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+    @media (max-width:520px){.card{padding:18px}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Career quiz</h1>
+      <p class="lead">Choose the answer that fits you best. At the end you'll see a result like "Mostly A → Teacher".</p>
+
+      <form id="quiz">
+
+        <div class="q" data-qid="q1">
+          <h3>1) Where do you want to work?</h3>
+          <label class="option"><input type="radio" name="q1" value="A">A. In a school</label>
+          <label class="option"><input type="radio" name="q1" value="B">B. In a hospital</label>
+          <label class="option"><input type="radio" name="q1" value="C">C. In a restaurant</label>
+          <label class="option"><input type="radio" name="q1" value="D">D. Outside</label>
+          <label class="option"><input type="radio" name="q1" value="E">E. In an office</label>
+        </div>
+
+        <div class="q" data-qid="q2">
+          <h3>2) What do you like doing?</h3>
+          <label class="option"><input type="radio" name="q2" value="A">A. Helping students</label>
+          <label class="option"><input type="radio" name="q2" value="B">B. Helping sick people</label>
+          <label class="option"><input type="radio" name="q2" value="C">C. Cooking food</label>
+          <label class="option"><input type="radio" name="q2" value="D">D. Growing plants / building things</label>
+          <label class="option"><input type="radio" name="q2" value="E">E. Using a computer</label>
+        </div>
+
+        <div class="q" data-qid="q3">
+          <h3>3) Do you like talking to people?</h3>
+          <label class="option"><input type="radio" name="q3" value="A">A. Yes, I talk a lot</label>
+          <label class="option"><input type="radio" name="q3" value="B">B. Yes, I listen and help</label>
+          <label class="option"><input type="radio" name="q3" value="C">C. Yes, I take orders</label>
+          <label class="option"><input type="radio" name="q3" value="D">D. A little</label>
+          <label class="option"><input type="radio" name="q3" value="E">E. Only a little</label>
+        </div>
+
+        <div class="q" data-qid="q4">
+          <h3>4) What time do you like to start work?</h3>
+          <label class="option"><input type="radio" name="q4" value="A">A. 8:00</label>
+          <label class="option"><input type="radio" name="q4" value="B">B. Early morning</label>
+          <label class="option"><input type="radio" name="q4" value="C">C. Afternoon or evening</label>
+          <label class="option"><input type="radio" name="q4" value="D">D. 10:00</label>
+          <label class="option"><input type="radio" name="q4" value="E">E. 9:00</label>
+        </div>
+
+        <div class="q" data-qid="q5">
+          <h3>5) What do you like more?</h3>
+          <label class="option"><input type="radio" name="q5" value="A">A. Children</label>
+          <label class="option"><input type="radio" name="q5" value="B">B. People who need help</label>
+          <label class="option"><input type="radio" name="q5" value="C">C. Delicious food</label>
+          <label class="option"><input type="radio" name="q5" value="D">D. Animals or tools</label>
+          <label class="option"><input type="radio" name="q5" value="E">E. Computers and technology</label>
+        </div>
+
+        <div class="actions">
+          <button type="button" id="submitBtn">See my result</button>
+          <button type="button" class="secondary" id="resetBtn">Reset</button>
+        </div>
+
+        <div id="result" aria-live="polite" style="display:none"></div>
+      </form>
+
+      <footer class="small">Tip: To publish this page on GitHub Pages, add this file as <code>index.html</code> to a repository and enable Pages in the repo settings.</footer>
+    </div>
+  </div>
+
+  <script>
+    const mapping = {
+      A: {title: 'Teacher', text: 'You like talking, helping, and working with students.'},
+      B: {title: 'Nurse / Doctor', text: 'You like helping people and working in a hospital.'},
+      C: {title: 'Chef / Cook / Waiter', text: 'You like food, restaurants, and talking to customers.'},
+      D: {title: 'Farmer / Builder / Driver', text: 'You like working outdoors and using tools.'},
+      E: {title: 'Office Worker / Computer Operator', text: 'You like computers, documents, and quiet work.'}
+    };
+
+    function getAnswers() {
+      const form = document.getElementById('quiz');
+      const data = {};
+      for (let i=1;i<=5;i++){
+        const name = 'q'+i;
+        const v = form.querySelector('input[name="'+name+'"]:checked');
+        data[name] = v ? v.value : null;
+      }
+      return data;
+    }
+
+    function calculateResult() {
+      const ans = getAnswers();
+      // validate
+      for (let i=1;i<=5;i++){
+        if (!ans['q'+i]) return {error: 'Please answer all questions.'};
+      }
+      const counts = {A:0,B:0,C:0,D:0,E:0};
+      for (let k in ans) counts[ans[k]]++;
+      // find max
+      const maxCount = Math.max(...Object.values(counts));
+      const winners = Object.keys(counts).filter(k=>counts[k]===maxCount);
+      return {counts, winners};
+    }
+
+    function showResult() {
+      const r = calculateResult();
+      const el = document.getElementById('result');
+      if (r.error) {
+        el.style.display = 'block';
+        el.innerHTML = '<strong style="color:#b91c1c">'+r.error+'</strong>';
+        return;
+      }
+      // handle tie
+      if (r.winners.length === 1) {
+        const k = r.winners[0];
+        el.innerHTML = `<h3>Mostly ${k} → ${mapping[k].title}</h3><p>${mapping[k].text}</p>`;
+      } else {
+        // multiple winners — show all
+        const titles = r.winners.map(x => `${x} → ${mapping[x].title}`).join('<br>');
+        el.innerHTML = `<h3>Tie: ${r.winners.join(', ')}</h3><p>${titles}</p>`;
+      }
+      el.style.display = 'block';
+      // scroll to result on small screens
+      el.scrollIntoView({behavior:'smooth'});
+    }
+
+    document.getElementById('submitBtn').addEventListener('click', showResult);
+    document.getElementById('resetBtn').addEventListener('click', ()=>{
+      document.getElementById('quiz').reset();
+      const el = document.getElementById('result'); el.style.display='none'; el.innerHTML='';
+    });
+  </script>
+</body>
+</html>
